@@ -4,11 +4,23 @@ import torch
 
 import json
 from torch.utils.data import Dataset
-from dialog_dataset import DialogConfig
+from dataclasses import dataclass
 from transformers import GPT2TokenizerFast, Trainer, AutoModelForCausalLM, TrainingArguments
 from utils import check_local_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+@dataclass
+class DialogConfig:
+    max_length: int = 1024
+    add_eos: bool = True          # add eos after every Assistant-answer
+    line_sep: str = "\n"          # line separator
+
+    token_user: str = "<|user|>"
+    token_assistant: str = "<|assistant|>"
+    token_knowledge: str = "<|knowledge|>"
+    token_turn: str = "<|turn|>"
 
 config = DialogConfig()
 
@@ -296,7 +308,7 @@ if __name__ == "__main__":
 
 
         train_dataset = DialogConditionDataset(
-            file_path="data/condition-dataset-7-slots.json",
+            file_path="slot-dataset-gen.json",
             tokenizer=tokenizer,
             max_length=256,
             add_eos=False,
