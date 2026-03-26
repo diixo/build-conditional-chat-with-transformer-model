@@ -19,12 +19,12 @@ EPOCHS = 30
 class DialogConfig:
     max_length: int = 1024
     add_eos: bool = True          # add eos after every Assistant-answer
-    line_sep: str = "\n"          # line separator
 
     token_user: str = "<|user|>"
     token_assistant: str = "<|assistant|>"
     token_knowledge: str = "<|knowledge|>"
     token_turn: str = "<|turn|>"
+
 
 config = DialogConfig()
 
@@ -47,12 +47,12 @@ def chatting(model, tokenizer, config):
             break
 
         if parts is None:
-            knowledge = "<|knowledge|> <|turn|>"
+            knowledge = f"<|knowledge|> {config.token_turn}"
         else:
             parts_str = "\n".join(parts)
-            knowledge = f"<|knowledge|>{parts_str}<|turn|>"
+            knowledge = f"<|knowledge|>{parts_str}{config.token_turn}"
 
-        prompt = f"<|user|> {user_msg} <|turn|>\n<|assistant|>"
+        prompt = f"<|user|> {user_msg} {config.token_turn}\n<|assistant|>"
         prompt = knowledge + prompt
 
         input_ids = tokenizer(prompt, truncation=True, add_special_tokens=False, max_length=config.max_length, return_tensors="pt")
