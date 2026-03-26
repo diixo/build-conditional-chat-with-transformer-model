@@ -523,6 +523,42 @@ class SlotDatasetGenerator:
                 "retrieve_user": ["knowledge: month"],
                 "retrieve_assistant": "month: {value}",
             },
+            "weather": {
+                "open_user": ["weather"],
+                "open_assistant": ["What is the weather like for you now?"],
+                "values": [
+                    "sunny",
+                    "foggy",
+                    "cloudy",
+                    "rainy",
+                    "drizzling",
+                    "snowy",
+                    "windy",
+                    "hot",
+                    "warm",
+                    "cool",
+                    "frosty",
+                    "damp"
+                ],
+                "fill_user_templates": [
+                    "It is {value}.",
+                    "{value}."
+                    "The weather is {value}.",
+                ],
+                "fill_assistant_templates": [
+                    "Got it, it is {value} for you now.",
+                    "Got it, it is {value}."
+                ],
+                "update_user_templates": [
+                    "Now the weather is {value}."
+                ],
+                "update_assistant_templates": [
+                    "Got it, now it is {value} for you.",
+                    "Got it, now it is {value}."
+                ],
+                "retrieve_user": ["knowledge: weather"],
+                "retrieve_assistant": "weather: {value}",
+            },
             "favorite_city": {
                 "open_user": ["favorite city"],
                 "open_assistant": ["What is your favorite city?"],
@@ -607,7 +643,7 @@ class SlotDatasetGenerator:
                     samples.append(self._make_sample({}, user_text, assistant_text, knowledge_out))
 
             # with cross-slot context
-            for _ in range(12):
+            for _ in range(16):
                 ctx = self._sample_context(slot, max_other_slots=3)
                 user_text = self._choice(cfg["open_user"])
                 assistant_text = self._choice(cfg["open_assistant"])
@@ -802,7 +838,7 @@ class SlotDatasetGenerator:
         # retrieval of one slot while others exist
         for target_slot in slot_names:
             cfg = self.slots[target_slot]
-            for other_slots_n in [1, 2, 3]:
+            for other_slots_n in [1, 2, 3, 4]:
                 others = [s for s in slot_names if s != target_slot]
                 if len(others) < other_slots_n:
                     continue
@@ -851,8 +887,8 @@ def main():
     gen = SlotDatasetGenerator(seed=42)
     data = gen.generate_all()
     print(f"Generated samples: {len(data)}")
-    save_dataset_json("slot-dataset-gen.json", data)
-    print("Saved to slot-dataset-gen.json")
+    save_dataset_json("slot-dataset-8-gen.json", data)
+    print("Saved to slot-dataset-8-gen.json")
 
 
 if __name__ == "__main__":
