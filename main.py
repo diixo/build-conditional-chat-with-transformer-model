@@ -11,6 +11,10 @@ from utils import check_local_model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+BATCH_SIZE = 6
+LEARNING_RATE = 1e-4
+EPOCHS = 30
+
 @dataclass
 class DialogConfig:
     max_length: int = 1024
@@ -25,16 +29,16 @@ class DialogConfig:
 config = DialogConfig()
 
 
-def chatting(model, tokenizer, turn_token=None):
+def chatting(model, tokenizer, config):
 
-    if turn_token is None:
-        turn_token_id = tokenizer.eos_token_id
-    else:
-        turn_token_id = tokenizer.convert_tokens_to_ids(turn_token)
+    turn_token_id = tokenizer.convert_tokens_to_ids(config.token_turn)
 
     knowledge_token_id = tokenizer.convert_tokens_to_ids(config.token_knowledge)
 
     print("Type 'exit' to stop.\n")
+
+    knowledge = ""
+    parts: None = []
 
     while True:
 
@@ -42,8 +46,14 @@ def chatting(model, tokenizer, turn_token=None):
         if user_msg.lower() in {"exit", "quit"}:
             break
 
+        if parts is None:
+            knowledge = "<|knowledge|> <|turn|>"
+        else:
+            parts_str = "\n".join(parts)
+            knowledge = f"<|knowledge|>{parts_str}<|turn|>"
 
         prompt = f"<|user|> {user_msg} <|turn|>\n<|assistant|>"
+        prompt = knowledge + prompt
 
         input_ids = tokenizer(prompt, truncation=True, add_special_tokens=False, max_length=config.max_length, return_tensors="pt")
 
@@ -54,7 +64,7 @@ def chatting(model, tokenizer, turn_token=None):
                 input_ids=input_ids,
                 max_new_tokens=50,
                 do_sample=False,
-                eos_token_id=[tokenizer.eos_token_id],
+                eos_token_id=tokenizer.eos_token_id,
                 pad_token_id=tokenizer.pad_token_id
             )[0]
 
@@ -74,7 +84,11 @@ def chatting(model, tokenizer, turn_token=None):
 
         answer = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-        knowledge = "" if knowledge_ids is None else tokenizer.decode(knowledge_ids, skip_special_tokens=False)
+        knowledge_draft = "" if knowledge_ids is None else tokenizer.decode(knowledge_ids, skip_special_tokens=False)
+
+        knowledge = "" if knowledge_ids is None else tokenizer.decode(knowledge_ids, skip_special_tokens=True)
+
+        parts = [x for x in knowledge.split("\n") if x.strip()]
 
         print(f"### Assistant: {answer.strip()}")
 
@@ -277,10 +291,6 @@ if __name__ == "__main__":
     model_dir = "outputs/trained_conditional_dialog"
     model_output_dir = model_dir
 
-    BATCH_SIZE = 4
-    LEARNING_RATE = 1e-4
-    EPOCHS = 30
-
     exist, msg = check_local_model(f"{model_output_dir}")
 
     if not exist:
@@ -318,9 +328,6 @@ if __name__ == "__main__":
 
 
         item = train_dataset[0]
-        # print(item.keys())
-        # print(len(item["input_ids"]))
-        # print(len(item["labels"]))
 
         ##################################################################
 
@@ -371,5 +378,4 @@ if __name__ == "__main__":
         tokenizer = GPT2TokenizerFast.from_pretrained(model_output_dir, local_files_only=True)
         model = AutoModelForCausalLM.from_pretrained(model_output_dir, local_files_only=True).to(device)
 
-    chatting(model, tokenizer, turn_token=config.token_turn)
-    #chatting(model, tokenizer)
+    chatting(model, tokenizer, config)

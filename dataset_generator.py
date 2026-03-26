@@ -589,6 +589,7 @@ class SlotDatasetGenerator:
             ctx[slot] = value
         return ctx
 
+
     def _iter_action_fill_pairs(self):
         action_cfg = self.slots["action"]
         for canonical in action_cfg["values"]:
@@ -614,6 +615,7 @@ class SlotDatasetGenerator:
                 knowledge_out[slot] = "unknown"
                 samples.append(self._make_sample(ctx, user_text, assistant_text, knowledge_out))
         return samples
+
 
     def generate_fill_samples(self) -> List[Dict[str, Any]]:
         samples = []
@@ -663,6 +665,7 @@ class SlotDatasetGenerator:
                     samples.append(self._make_sample(knowledge_in, user_text, assistant_text, knowledge_out))
         return samples
 
+
     def generate_update_samples(self) -> List[Dict[str, Any]]:
         samples = []
         for slot, cfg in self.slots.items():
@@ -680,7 +683,7 @@ class SlotDatasetGenerator:
                     user_base = self._choice(cfg["fill_map"][new_v])
                     # rewrite to "Now I am..." when possible
                     if user_base.startswith("I am "):
-                        user_text = "Now " + user_base[2:]
+                        user_text = "Now " + user_base[2:] # TODO: 2-?
                     elif user_base.startswith("I "):
                         user_text = "Now " + user_base
                     else:
@@ -735,6 +738,7 @@ class SlotDatasetGenerator:
                         samples.append(self._make_sample(k_in, user_text, assistant_text, k_out))
         return samples
 
+
     def generate_retrieval_samples(self) -> List[Dict[str, Any]]:
         samples = []
         for slot, cfg in self.slots.items():
@@ -771,6 +775,7 @@ class SlotDatasetGenerator:
                     )
                 )
         return samples
+
 
     def generate_cross_slot_disambiguation(self) -> List[Dict[str, Any]]:
         samples = []
