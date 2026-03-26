@@ -495,6 +495,7 @@ class SlotDatasetGenerator:
                     "Got it, now you feel {value}.",
                     "Got it, now you are {value}."
                 ],
+
                 "retrieve_user": ["knowledge: mood"],
                 "retrieve_assistant": "mood: {value}",
             },
@@ -542,7 +543,7 @@ class SlotDatasetGenerator:
                 ],
                 "fill_user_templates": [
                     "It is {value}.",
-                    "{value}."
+                    "weather is {value}.",
                     "The weather is {value}.",
                 ],
                 "fill_assistant_templates": [
