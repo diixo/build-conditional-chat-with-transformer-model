@@ -885,11 +885,13 @@ def save_dataset_json(path: str, data: List[Dict[str, Any]]) -> None:
 
 
 def main():
+    file_path = "data/slot-8-dataset-gen.json"
+
     gen = SlotDatasetGenerator(seed=42)
     data = gen.generate_all()
     print(f"Generated samples: {len(data)}")
-    save_dataset_json("slot-dataset-8-gen.json", data)
-    print("Saved to slot-dataset-8-gen.json")
+    save_dataset_json(file_path, data)
+    print(f"Saved to: {file_path}")
 
 
 if __name__ == "__main__":
