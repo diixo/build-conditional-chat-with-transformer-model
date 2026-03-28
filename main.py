@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
 
         train_dataset = DialogConditionDataset(
-            file_path="slot-dataset-gen.json",
+            file_path="data/slot-7-dataset-gen.json",
             tokenizer=tokenizer,
             max_length=256,
             add_eos=False,
