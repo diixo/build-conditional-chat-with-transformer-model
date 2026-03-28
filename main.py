@@ -15,10 +15,10 @@ BATCH_SIZE = 6
 LEARNING_RATE = 1e-4
 EPOCHS = 30
 
+
 @dataclass
 class DialogConfig:
     max_length: int = 1024
-    add_eos: bool = True          # add eos after every Assistant-answer
 
     token_user: str = "<|user|>"
     token_assistant: str = "<|assistant|>"
@@ -101,13 +101,11 @@ class DialogConditionDataset(Dataset):
         file_path: str,
         tokenizer,
         max_length: Optional[int] = None,
-        add_eos: bool = True,
         cfg: DialogConfig = DialogConfig(),
     ):
         self.file_path = file_path
         self.tokenizer = tokenizer
         self.max_length = max_length
-        self.add_eos = add_eos
 
         self.tok_knowledge = cfg.token_knowledge
         self.tok_user = cfg.token_user
@@ -229,10 +227,12 @@ class DialogConditionDataset(Dataset):
 
         attention_mask = [1] * len(input_ids)
 
-        if self.add_eos and self.tokenizer.eos_token_id is not None:
+        if self.tokenizer.eos_token_id is not None:
             input_ids.append(self.tokenizer.eos_token_id)
             labels.append(self.tokenizer.eos_token_id)
             attention_mask.append(1)
+        else:
+            assert False, "tokenizer must have eos_token_id"
 
         if self.max_length is not None:
             input_ids = input_ids[:self.max_length]
@@ -296,7 +296,7 @@ if __name__ == "__main__":
     if not exist:
 
         tokenizer = GPT2TokenizerFast.from_pretrained(
-            "gpt2",
+            MODEL_NAME,
             local_files_only=False,
             padding_side="right",
             model_max_length=1024
@@ -321,7 +321,6 @@ if __name__ == "__main__":
             file_path="data/slot-7-dataset-gen.json",
             tokenizer=tokenizer,
             max_length=256,
-            add_eos=False,
         )
 
         print(f"input dataset.sz={len(train_dataset)}")
